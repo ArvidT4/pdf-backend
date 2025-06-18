@@ -21,5 +21,21 @@ const insertTest = async () => {
         console.log('insert data', data)
     }
 }
+const signUp = async (user) => {
+    console.log('SUPABASE_URL:', process.env.SUPABASE_URL)
 
-module.exports = { insertTest, supabase }
+    const { data, error } = await supabase.auth.signUp({
+        email: user.email,
+        password: user.password
+    });
+    if (error) {
+        console.log('insert error', error)
+        return error
+    } else {
+        console.log('insert data', data)
+        return data
+    }
+    return "nop"
+}
+
+module.exports = { insertTest, supabase,signUp }
