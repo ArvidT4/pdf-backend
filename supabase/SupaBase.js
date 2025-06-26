@@ -22,7 +22,6 @@ const insertTest = async () => {
     }
 }
 const signUp = async (user) => {
-    console.log('SUPABASE_URL:', process.env.SUPABASE_URL)
 
     const { data, error } = await supabase.auth.signUp({
         email: user.email,
@@ -33,9 +32,24 @@ const signUp = async (user) => {
         return error
     } else {
         console.log('insert data', data)
-        return data
+        return data.session.access_token
+    }
+    return "nop"
+}
+const signIn = async (user) => {
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: user.password
+    });
+    if (error) {
+        console.log('insert error', error)
+        return error
+    } else {
+        console.log('insert data', data)
+        return data.session.access_token
     }
     return "nop"
 }
 
-module.exports = { insertTest, supabase,signUp }
+module.exports = { insertTest, supabase,signUp, signIn }
