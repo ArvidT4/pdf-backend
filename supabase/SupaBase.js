@@ -1,6 +1,5 @@
 require('dotenv').config(); // ✅ Must be at the top
 const jwt = require('jsonwebtoken');
-
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -123,10 +122,10 @@ const signUp = async (user) => {
 
     if (error) {
         console.log('Signup error', error);
-        return error;
+        return {success:false,error:error};
     }
 
-    return data.session?.access_token || null;
+    return {success:true, token:data.session?.access_token} || null;
 };
 
 const signIn = async (user) => {
@@ -138,10 +137,10 @@ const signIn = async (user) => {
 
     if (error) {
         console.log('Signin error', error);
-        return error;
+        return {success:false,error:error};
     }
 
-    return data.session?.access_token || null;
+    return {success:true, token:data.session?.access_token} || null;
 };
 
 module.exports = {getSupaClient, signUp, signIn, insertPdf, generateFileFromSupabase,genFiles };
