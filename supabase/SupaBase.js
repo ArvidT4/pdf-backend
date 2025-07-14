@@ -21,7 +21,17 @@ const extractUserId=(token)=>{
     return userId
 }
 
+const verifyUser=async (token)=>{
+    const supabase=createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const {data:user,error}=await supabase.auth.getUser(token);
 
+    if (error) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+    //console.log(user.user)
+    return user.user
+
+}
 const genFiles=async(token)=>{
     const supabase = getSupaClient(token);
 
@@ -143,4 +153,4 @@ const signIn = async (user) => {
     return {success:true, token:data.session?.access_token} || null;
 };
 
-module.exports = {getSupaClient, signUp, signIn, insertPdf, generateFileFromSupabase,genFiles };
+module.exports = {getSupaClient, signUp, signIn, insertPdf, generateFileFromSupabase,genFiles,verifyUser };
