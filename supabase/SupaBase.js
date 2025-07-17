@@ -32,6 +32,25 @@ const verifyUser=async (token)=>{
     return user.user
 
 }
+const selectPdfTable=async (supaToken)=>{
+    try {
+        const supabase=await getSupaClient(supaToken)
+        const { data, error } = await supabase
+            .from('pdfs')
+            .select('*');
+        if(error){
+            console.log(error)
+            return false
+        }
+        else{
+            console.log(data)
+            return data
+        }
+    }catch(err){
+        console.log(err)
+        return false
+    }
+}
 const genFiles=async(token)=>{
     const supabase = getSupaClient(token);
 
@@ -153,4 +172,4 @@ const signIn = async (user) => {
     return {success:true, token:data.session?.access_token} || null;
 };
 
-module.exports = {getSupaClient, signUp, signIn, insertPdf, generateFileFromSupabase,genFiles,verifyUser };
+module.exports = {getSupaClient, signUp, signIn, insertPdf, generateFileFromSupabase,genFiles,verifyUser,selectPdfTable };

@@ -2,10 +2,16 @@ var express = require('express');
 var router = express.Router();
 const multer = require('multer');
 
-const { insertPdf,generateFileFromSupabase,genFiles } = require('../supabase/SupaBase')
-
+const { insertPdf,generateFileFromSupabase,genFiles,selectPdfTable } = require('../supabase/SupaBase')
+const {checkCookie}=require('./middlewares')
 const upload = multer({ storage: multer.memoryStorage() }); // or use diskStorage()
 
+router.get("/selectPdfs",checkCookie,async function(req,res,next){
+    const supaToken = req.cookies.supaToken;
+    console.log("testar")
+    res.json(await selectPdfTable(supaToken))
+
+})
 router.post("/insertPdf", upload.single('pdf'), async function(req,res){
     const title=req.body;
     const file=req.file;
