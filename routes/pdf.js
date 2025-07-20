@@ -12,16 +12,18 @@ router.get("/selectPdfs",checkCookie,async function(req,res,next){
     res.json(await selectPdfTable(supaToken))
 
 })
-router.post("/insertPdf", upload.single('pdf'), async function(req,res){
-    const title=req.body;
+router.post("/insertPdf",checkCookie, upload.single('pdf'), async function(req,res){
+
+    const title=req.body.title;
+    console.log(title)
     const file=req.file;
 
     if (!file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    res.json(await insertPdf(title, token, file))
+    const supaToken = req.cookies.supaToken;
+
+    res.json(await insertPdf(title, supaToken, file))
 })
 router.post("/generatePdf", async function(req, res) {
     const authHeader = req.headers.authorization;
