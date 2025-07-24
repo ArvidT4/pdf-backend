@@ -3,8 +3,7 @@ const jwt = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.SUPABASE_KEY;
-
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const getSupaClient = (token) => {
     //console.log(jwt.decode(token))
     return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -51,45 +50,27 @@ const selectPdfTable=async (supaToken)=>{
         return false
     }
 }
-const genFiles=async(token)=>{
-    const supabase = getSupaClient(token);
-
-    const { data, error } = await supabase
-        .storage
-        .from('pdf-bucket')
-        .list(extractUserId(token));
-
-    console.log('Files in folder:', data);
-}
-const generateFileFromSupabase = async (filePath, token) => {
+const generatePdf = async (filePath, token) => {
     try {
-
-
-        const cleanedPath = String(filePath).trim();
-        console.log(JSON.stringify(cleanedPath));
-
         const supabase = getSupaClient(token);
 
-
-
-        const { data, error } = await supabase
+        const { data: file, error } = await supabase
             .storage
             .from('pdf-bucket')
-            .createSignedUrl(cleanedPath, 60);
+            .download(filePath.trim());
 
         if (error) {
-            console.error('Supabase error:', error);
+            console.error("Supabase download error:", error);
             return null;
         }
 
-        const signedUrl = data.signedUrl;
-        console.log('Signed URL:', signedUrl); // Optional
-        return signedUrl;
+        return file; // this is a readable stream
     } catch (err) {
-        console.error('generate error', err);
+        console.error('generatePdf error:', err);
         return null;
     }
 };
+
 const insertPdf = async (title, token,pdf) => {
     try {
         const supabase = getSupaClient(token);
@@ -172,4 +153,4 @@ const signIn = async (user) => {
     return {success:true, token:data.session?.access_token} || null;
 };
 
-module.exports = {getSupaClient, signUp, signIn, insertPdf, generateFileFromSupabase,genFiles,verifyUser,selectPdfTable };
+module.exports = {getSupaClient, signUp, signIn, insertPdf,verifyUser,selectPdfTable,generatePdf };

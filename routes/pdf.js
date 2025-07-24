@@ -2,10 +2,19 @@ var express = require('express');
 var router = express.Router();
 const multer = require('multer');
 
-const { insertPdf,generateFileFromSupabase,genFiles,selectPdfTable } = require('../supabase/SupaBase')
+const { insertPdf,selectPdfTable,generatePdf } = require('../supabase/SupaBase')
 const {checkCookie}=require('./middlewares')
 const upload = multer({ storage: multer.memoryStorage() }); // or use diskStorage()
 
+const streamToBuffer = (stream) => {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+
+        stream.on('data', (chunk) => chunks.push(chunk));
+        stream.on('end', () => resolve(Buffer.concat(chunks)));
+        stream.on('error', reject);
+    });
+};
 router.get("/selectPdfs",checkCookie,async function(req,res,next){
     const supaToken = req.cookies.supaToken;
     console.log("testar")
@@ -25,22 +34,22 @@ router.post("/insertPdf",checkCookie, upload.single('pdf'), async function(req,r
 
     res.json(await insertPdf(title, supaToken, file))
 })
-router.post("/generatePdf", async function(req, res) {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    const filePath = req.body.filePath; // ✅ Now works!
-
+router.get("/generatePdfFile",checkCookie, async function(req, res) {
+    const filePath = req.headers.filepath; // ✅ Now works!
+    console.log(filePath)
     if (!filePath) {
         return res.status(400).json({ error: "Missing filePath in request body" });
     }
+    const token=req.cookies.supaToken
 
-    await genFiles(token); // optional debugging
-    const signedUrl = await generateFileFromSupabase(filePath, token);
+    //const signedUrl=await generatePdf(filePath,token)
+    // if (!signedUrl) {
+    //     return res.status(500).json({ error: "Could not generate signed URL" });
+    // }
 
-    if (!signedUrl) {
-        return res.status(500).json({ error: "Could not generate signed URL" });
-    }
-
-    res.json({ signedUrl });
+    const file = await generatePdf(filePath, token);
+    const buffer = await streamToBuffer(file);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(buffer);
 });
 module.exports=router
