@@ -54,7 +54,7 @@ const generatePdf = async (filePath, token) => {
     try {
         const supabase = getSupaClient(token);
 
-        const { data: file, error } = await supabase
+        const { data: blob, error } = await supabase
             .storage
             .from('pdf-bucket')
             .download(filePath.trim());
@@ -64,12 +64,14 @@ const generatePdf = async (filePath, token) => {
             return null;
         }
 
-        return file; // this is a readable stream
+        const buffer = await blob.arrayBuffer(); // 👈 convert Blob to ArrayBuffer
+        return Buffer.from(buffer); // 👈 convert to Node.js Buffer
     } catch (err) {
         console.error('generatePdf error:', err);
         return null;
     }
 };
+
 
 const insertPdf = async (title, token,pdf) => {
     try {

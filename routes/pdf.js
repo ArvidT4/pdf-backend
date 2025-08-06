@@ -48,8 +48,8 @@ router.get("/generatePdfFile",checkCookie, async function(req, res) {
     // }
 
     const file = await generatePdf(filePath, token);
-    const buffer = await streamToBuffer(file);
+    console.log(file)
     res.setHeader("Content-Type", "application/pdf");
-    res.send(buffer);
+    res.send(file);
 });
 module.exports=router
